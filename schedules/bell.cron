@@ -1,0 +1,77 @@
+################################################################################
+# Morning Bell
+################################################################################
+
+0 17 8 ? * MON,TUE,WED,THU,FRI *
+
+################################################################################
+# Morning Schedule - Monday, Wednesday, Thursday, and Friday
+################################################################################
+
+# First Period
+0 20 8 ? * MON,WED,THU,FRI *
+0 0 9 ? * MON,WED,THU,FRI *
+
+# Second Period
+0 3 9 ? * MON,WED,THU,FRI *
+0 42 9 ? * MON,WED,THU,FRI *
+
+# Third Period
+0 45 9 ? * MON,WED,THU,FRI *
+0 25 10 ? * MON,WED,THU,FRI *
+
+# Fourth Period
+0 28 10 ? * MON,WED,THU,FRI *
+0 7 11 ? * MON,WED,THU,FRI *
+
+################################################################################
+# Morning Schedule - Tuesday
+################################################################################
+
+# Chapel
+0 20 8 ? * TUE *
+0 0 9 ? * TUE *
+
+# First Period
+0 3 9 ? * TUE *
+0 32 9 ? * TUE *
+
+# Second Period
+0 35 9 ? * TUE *
+0 4 10 ? * TUE *
+
+# Third Period
+0 7 10 ? * TUE *
+0 36 10 ? * TUE *
+
+# Fourth Period
+0 39 10 ? * TUE *
+0 7 11 ? * TUE *
+
+################################################################################
+# Afternoon Schedule
+################################################################################
+
+# Recess
+0 10 11 ? * MON,TUE,WED,THU,FRI *
+0 30 11 ? * MON,TUE,WED,THU,FRI *
+
+# Lunch
+0 35 11 ? * MON,TUE,WED,THU,FRI *
+0 0 12 ? * MON,TUE,WED,THU,FRI *
+
+# Fifth Period
+0 3 12 ? * MON,TUE,WED,THU,FRI *
+0 48 12 ? * MON,TUE,WED,THU,FRI *
+
+# Sixth Period
+0 51 12 ? * MON,TUE,WED,THU,FRI *
+0 39 13 ? * MON,TUE,WED,THU,FRI *
+
+# Seventh Period
+0 42 13 ? * MON,TUE,WED,THU,FRI *
+0 27 14 ? * MON,TUE,WED,THU,FRI *
+
+# Eighth Period
+0 30 14 ? * MON,TUE,WED,THU,FRI *
+0 15 15 ? * MON,TUE,WED,THU,FRI *

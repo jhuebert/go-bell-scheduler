@@ -1,0 +1,53 @@
+################################################################################
+# Morning Bell
+################################################################################
+
+0 17 8 ? * MON-FRI *
+
+################################################################################
+# Pep Rally Schedule
+################################################################################
+
+# First Period
+0 20 8 ? * MON-FRI *
+0 0 9 ? * MON-FRI *
+
+# Second Period
+0 3 9 ? * MON-FRI *
+0 42 9 ? * MON-FRI *
+
+# Third Period
+0 45 9 ? * MON-FRI *
+0 25 10 ? * MON-FRI *
+
+# Fourth Period
+0 28 10 ? * MON-FRI *
+0 7 11 ? * MON-FRI *
+
+# Recess
+0 10 11 ? * MON-FRI *
+0 30 11 ? * MON-FRI *
+
+# Lunch
+0 35 11 ? * MON-FRI *
+0 0 12 ? * MON-FRI *
+
+# Fifth Period
+0 3 12 ? * MON-FRI *
+0 43 12 ? * MON-FRI *
+
+# Sixth Period
+0 46 12 ? * MON-FRI *
+0 26 13 ? * MON-FRI *
+
+# Seventh Period
+0 29 13 ? * MON-FRI *
+0 9 14 ? * MON-FRI *
+
+# Eighth Period
+0 12 14 ? * MON-FRI *
+0 52 14 ? * MON-FRI *
+
+# Pep Rally
+0 55 14 ? * MON-FRI *
+0 15 15 ? * MON-FRI *
