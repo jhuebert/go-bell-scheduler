@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-func GetPlayBellFunc(path string) func() {
+func GetPlayBellFunc(path string, loops int) func() {
 	return func() {
 		log.Info("Playing bell")
-		playBell(path)
+		playBell(path, loops)
 	}
 }
 
-func playBell(path string) {
+func playBell(path string, loops int) {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Errorf("Sound file not found - %v", err)
@@ -37,7 +37,7 @@ func playBell(path string) {
 
 	done := make(chan struct{})
 
-	t := beep.Loop(5, s)
+	t := beep.Loop(loops, s)
 
 	speaker.Play(beep.Seq(t, beep.Callback(func() {
 		close(done)

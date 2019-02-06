@@ -17,13 +17,13 @@ func main() {
 	bellPath := flag.String("bell", "", "path to bell sound")
 	cronPath := flag.String("cron", "", "path to bell cron")
 	logLevel := flag.String("log", "info", "logging level. Can be one of [trace, debug, info, warn, error, fatal, panic]")
-	loopCount := flag.Int64("loops", 1, "number of times to play the bell sound in succession")
-	updateScheduleSeconds := flag.Int64("update", 60, "number of seconds delay between checking the cron schedule for updates")
+	loopCount := flag.Int("loops", 1, "number of times to play the bell sound in succession")
+	updateScheduleSeconds := flag.Int("update", 60, "number of seconds delay between checking the cron schedule for updates")
 	flag.Parse()
 
 	level, err := log.ParseLevel(*logLevel)
 	if err != nil {
-		log.Warnf("Invalid input log level - %v", *logLevel)
+		log.Warnf("Invalid input log level - %q", *logLevel)
 		log.Warnf("Setting log level to info")
 		level = log.InfoLevel
 	}
@@ -34,7 +34,7 @@ func main() {
 		flag.Usage()
 		return
 	} else if !fileExists(*bellPath) {
-		log.Errorf("Bell sound file does not exist - %v", *bellPath)
+		log.Errorf("Bell sound file does not exist - %q", *bellPath)
 		flag.Usage()
 		return
 	}
@@ -44,7 +44,7 @@ func main() {
 		flag.Usage()
 		return
 	} else if !fileExists(*cronPath) {
-		log.Errorf("Cron file does not exist - %v", *cronPath)
+		log.Errorf("Cron file does not exist - %q", *cronPath)
 		flag.Usage()
 		return
 	}
@@ -56,7 +56,7 @@ func main() {
 	}
 
 	if *updateScheduleSeconds < 1 {
-		log.Error("Number of seconds between sechdule updates must be at least 1")
+		log.Error("Number of seconds between schedule updates must be at least 1")
 		flag.Usage()
 		return
 	}
@@ -66,13 +66,13 @@ func main() {
 	c := cron.New()
 
 	// Create the function that plays the bell
-	bellFunc := GetPlayBellFunc(*bellPath)
+	bellFunc := GetPlayBellFunc(*bellPath, *loopCount)
 
 	// Create the function that updates the schedule
 	updateFunc := GetUpdateScheduleFunc(c, *cronPath, scheduleMap, bellFunc)
 
 	// Add the update function to be executed periodically
-	_, err = c.AddFunc("@every "+strconv.FormatInt(*updateScheduleSeconds, 10)+"s", updateFunc)
+	_, err = c.AddFunc("@every "+strconv.FormatInt(int64(*updateScheduleSeconds), 10)+"s", updateFunc)
 	if err != nil {
 		log.Error("Error adding schedule updater - %v", err)
 		return
