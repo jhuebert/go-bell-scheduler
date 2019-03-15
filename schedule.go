@@ -2,13 +2,15 @@ package main
 
 import (
 	"bufio"
+	"fmt"
+	"github.com/beevik/ntp"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/robfig/cron.v2"
 	"os"
 	"strings"
+	"time"
 )
 
-type BellSchedule map[string]cron.EntryID
+type BellSchedule map[string]EntryID
 
 type scheduleDifference struct {
 	commonKeys  []string
@@ -16,14 +18,14 @@ type scheduleDifference struct {
 	onlyOnRight []string
 }
 
-func GetUpdateScheduleFunc(c *cron.Cron, cronPath string, scheduleMap BellSchedule, bellFunc func()) func() {
+func GetUpdateScheduleFunc(c *Cron, cronPath string, scheduleMap BellSchedule, bellFunc func()) func() {
 	return func() {
 		log.Info("Updating schedule")
 		updateSchedule(c, cronPath, scheduleMap, bellFunc)
 	}
 }
 
-func updateSchedule(c *cron.Cron, cronPath string, currentSchedule BellSchedule, bellFunc func()) {
+func updateSchedule(c *Cron, cronPath string, currentSchedule BellSchedule, bellFunc func()) {
 
 	// Read the updated patterns from the cron file
 	fileSchedule, err := readSchedule(cronPath)
@@ -54,6 +56,39 @@ func updateSchedule(c *cron.Cron, cronPath string, currentSchedule BellSchedule,
 		log.Infof("Next execution is %v", c.Entry(id).Next)
 		currentSchedule[key] = id
 	}
+}
+
+func updateEntryOffset(c *Cron) {
+
+	externalTime, err := ntp.Time("time.nist.gov")
+	if err != nil {
+		log.Warnf("Unable to get network time - %v", err)
+		return
+	}
+
+	// Must be immediately after return of network time to minimize the amount of difference
+	// TODO Could potentially use channel to synchronize
+	internalTime := time.Now()
+
+	// Calculate the difference in time between the local machine and network
+	difference := internalTime.Sub(externalTime)
+
+	fmt.Println(externalTime)
+	fmt.Println(internalTime)
+	fmt.Println(difference)
+
+	//entries := c.Entries()
+
+	//for _, e := range entries {
+	//e.Next = nil
+	//}
+
+	// TODO This will not work as it gives us a copy of the entries
+
+	//TODO Update next scheduled time for each entry
+
+	// Call Entries fetch one more time so that the updated timestamps will be applied
+	c.Entries()
 }
 
 func readSchedule(cronPath string) (BellSchedule, error) {

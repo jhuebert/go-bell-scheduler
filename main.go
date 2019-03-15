@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/robfig/cron.v2"
 	"os"
 	"strconv"
 )
@@ -19,6 +18,8 @@ func main() {
 	logLevel := flag.String("log", "info", "logging level. Can be one of [trace, debug, info, warn, error, fatal, panic]")
 	loopCount := flag.Int("loops", 1, "number of times to play the bell sound in succession")
 	updateScheduleSeconds := flag.Int("update", 60, "number of seconds delay between checking the cron schedule for updates")
+	ntpPeriod := flag.Int("ntp-period", 3600, "number of seconds delay between fetching the latest network time")
+	ntpUrl := flag.String("ntp-url", "time.nist.gov", "number of seconds delay between fetching the latest network time")
 	flag.Parse()
 
 	level, err := log.ParseLevel(*logLevel)
@@ -61,9 +62,21 @@ func main() {
 		return
 	}
 
+	if *ntpPeriod < 1 {
+		log.Error("Number of seconds between network time updates must be at least 1")
+		flag.Usage()
+		return
+	}
+
+	if *ntpUrl == "" {
+		log.Error("NTP URL required")
+		flag.Usage()
+		return
+	}
+
 	// Create the cron scheduler
 	scheduleMap := make(BellSchedule)
-	c := cron.New()
+	c := New()
 
 	// Create the function that plays the bell
 	bellFunc := GetPlayBellFunc(*bellPath, *loopCount)
