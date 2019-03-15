@@ -16,10 +16,10 @@ func main() {
 	bellPath := flag.String("bell", "", "path to bell sound")
 	cronPath := flag.String("cron", "", "path to bell cron")
 	logLevel := flag.String("log", "info", "logging level. Can be one of [trace, debug, info, warn, error, fatal, panic]")
-	loopCount := flag.Int("loops", 1, "number of times to play the bell sound in succession")
-	updateScheduleSeconds := flag.Int("update", 60, "number of seconds delay between checking the cron schedule for updates")
+	loopCount := flag.Int("loops", 5, "number of times to play the bell sound in succession")
+	updateScheduleSeconds := flag.Int("update", 900, "number of seconds delay between checking the cron schedule for updates")
 	ntpPeriod := flag.Int("ntp-period", 3600, "number of seconds delay between fetching the latest network time")
-	ntpUrl := flag.String("ntp-url", "time.nist.gov", "number of seconds delay between fetching the latest network time")
+	ntpUrl := flag.String("ntp-url", "time.google.com", "number of seconds delay between fetching the latest network time")
 	flag.Parse()
 
 	level, err := log.ParseLevel(*logLevel)
@@ -97,12 +97,12 @@ func main() {
 		return
 	}
 
+	// Start the scheduler
+	c.Start()
+
 	// Execute the updater functions once immediately
 	updateTimeOffsetFunc()
 	updateScheduleFunc()
-
-	// Start the scheduler
-	c.Start()
 
 	// Wait indefinitely
 	select {}
