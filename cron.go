@@ -10,13 +10,15 @@ import (
 // specified by the schedule. It may be started, stopped, and the entries may
 // be inspected while running.
 type Cron struct {
-	entries  []*Entry
-	stop     chan struct{}
-	add      chan *Entry
-	remove   chan EntryID
-	snapshot chan []Entry
-	running  bool
-	nextID   EntryID
+	entries          []*Entry
+	stop             chan struct{}
+	add              chan *Entry
+	remove           chan EntryID
+	snapshot         chan []Entry
+	running          bool
+	nextID           EntryID
+	timeOffset       time.Duration
+	timeOffsetUpdate chan time.Duration
 }
 
 // Job is an interface for submitted cron jobs.
@@ -79,12 +81,14 @@ func (s byTime) Less(i, j int) bool {
 // New returns a new Cron job runner.
 func New() *Cron {
 	return &Cron{
-		entries:  nil,
-		add:      make(chan *Entry),
-		stop:     make(chan struct{}),
-		snapshot: make(chan []Entry),
-		remove:   make(chan EntryID),
-		running:  false,
+		entries:          nil,
+		add:              make(chan *Entry),
+		stop:             make(chan struct{}),
+		snapshot:         make(chan []Entry),
+		remove:           make(chan EntryID),
+		running:          false,
+		timeOffset:       time.Duration(0),
+		timeOffsetUpdate: make(chan time.Duration),
 	}
 }
 
@@ -151,6 +155,15 @@ func (c *Cron) Remove(id EntryID) {
 	}
 }
 
+// Updates the system time offset to use for scheduling
+func (c *Cron) UpdateTimeOffset(newTimeOffset time.Duration) {
+	if !c.running {
+		c.timeOffset = newTimeOffset
+	} else {
+		c.timeOffsetUpdate <- newTimeOffset
+	}
+}
+
 // Start the cron scheduler in its own go-routine.
 func (c *Cron) Start() {
 	c.running = true
@@ -161,7 +174,7 @@ func (c *Cron) Start() {
 // access to the 'running' state variable.
 func (c *Cron) run() {
 	// Figure out the next activation times for each entry.
-	now := time.Now().Local()
+	now := time.Now().Local().Add(c.timeOffset)
 	for _, entry := range c.entries {
 		entry.Next = entry.Schedule.Next(now)
 	}
@@ -202,11 +215,14 @@ func (c *Cron) run() {
 		case id := <-c.remove:
 			c.removeEntry(id)
 
+		case newTimeOffset := <-c.timeOffsetUpdate:
+			c.timeOffset = newTimeOffset
+
 		case <-c.stop:
 			return
 		}
 
-		now = time.Now().Local()
+		now = time.Now().Local().Add(c.timeOffset)
 	}
 }
 

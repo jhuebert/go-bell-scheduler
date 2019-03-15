@@ -81,15 +81,25 @@ func main() {
 	// Create the function that plays the bell
 	bellFunc := GetPlayBellFunc(*bellPath, *loopCount)
 
-	// Create the function that updates the schedule
-	updateFunc := GetUpdateScheduleFunc(c, *cronPath, scheduleMap, bellFunc)
+	// Add the time offset update function to be executed periodically
+	updateTimeOffsetFunc := GetUpdateTimeOffsetFunc(c, *ntpUrl)
+	_, err = c.AddFunc("@every "+strconv.Itoa(*ntpPeriod)+"s", updateTimeOffsetFunc)
+	if err != nil {
+		log.Error("Error adding time offset updater - %v", err)
+		return
+	}
 
-	// Add the update function to be executed periodically
-	_, err = c.AddFunc("@every "+strconv.FormatInt(int64(*updateScheduleSeconds), 10)+"s", updateFunc)
+	// Add the schedule update function to be executed periodically
+	updateScheduleFunc := GetUpdateScheduleFunc(c, *cronPath, scheduleMap, bellFunc)
+	_, err = c.AddFunc("@every "+strconv.Itoa(*updateScheduleSeconds)+"s", updateScheduleFunc)
 	if err != nil {
 		log.Error("Error adding schedule updater - %v", err)
 		return
 	}
+
+	// Execute the updater functions once immediately
+	updateTimeOffsetFunc()
+	updateScheduleFunc()
 
 	// Start the scheduler
 	c.Start()

@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/beevik/ntp"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -58,37 +57,33 @@ func updateSchedule(c *Cron, cronPath string, currentSchedule BellSchedule, bell
 	}
 }
 
-func updateEntryOffset(c *Cron) {
+func GetUpdateTimeOffsetFunc(c *Cron, ntpUrl string) func() {
+	return func() {
+		log.Info("Updating time offset")
+		updateTimeOffset(c, ntpUrl)
+	}
+}
 
-	externalTime, err := ntp.Time("time.nist.gov")
+func updateTimeOffset(c *Cron, ntpUrl string) {
+
+	// Fetch the network time
+	networkTime, err := ntp.Time(ntpUrl)
 	if err != nil {
 		log.Warnf("Unable to get network time - %v", err)
 		return
 	}
 
-	// Must be immediately after return of network time to minimize the amount of difference
-	// TODO Could potentially use channel to synchronize
-	internalTime := time.Now()
+	// Fetch the system time immediately after return of network time to minimize difference
+	systemTime := time.Now().Local()
+	log.Infof("System time - %v", systemTime)
+	log.Infof("Network time - %v", networkTime.Local())
 
 	// Calculate the difference in time between the local machine and network
-	difference := internalTime.Sub(externalTime)
+	timeOffset := networkTime.Local().Sub(systemTime)
+	log.Infof("Time difference - %v", timeOffset)
 
-	fmt.Println(externalTime)
-	fmt.Println(internalTime)
-	fmt.Println(difference)
-
-	//entries := c.Entries()
-
-	//for _, e := range entries {
-	//e.Next = nil
-	//}
-
-	// TODO This will not work as it gives us a copy of the entries
-
-	//TODO Update next scheduled time for each entry
-
-	// Call Entries fetch one more time so that the updated timestamps will be applied
-	c.Entries()
+	// Update the time offset in the cron scheduler
+	c.UpdateTimeOffset(timeOffset)
 }
 
 func readSchedule(cronPath string) (BellSchedule, error) {
